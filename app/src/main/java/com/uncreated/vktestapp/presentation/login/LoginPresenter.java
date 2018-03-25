@@ -1,9 +1,6 @@
 package com.uncreated.vktestapp.presentation.login;
 
-import android.os.AsyncTask;
-
-import com.uncreated.vktestapp.model.Session;
-import com.uncreated.vktestapp.model.VkClient;
+import com.uncreated.vktestapp.model.vk.VkHttpClient;
 import com.uncreated.vktestapp.mvp.PresenterBase;
 import com.uncreated.vktestapp.ui.login.LoginView;
 
@@ -12,84 +9,56 @@ import com.uncreated.vktestapp.ui.login.LoginView;
  * Презентер для {@link LoginView}
  */
 public class LoginPresenter extends PresenterBase<LoginView> {
+    private static final int OPEN_URL_ID = 3;
+    private static final int SHOW_WEB_ID = 4;
+    private static final int ERROR_ID = 5;
+    private static final int LOGGED_IN_ID = 6;
+
     private static final LoginPresenter ourInstance = new LoginPresenter();
 
     public static LoginPresenter getInstance() {
         return ourInstance;
     }
 
-    private VkClient mVkClient = VkClient.getInstance();
-    private LogInHandler mLogInHandler = new LogInHandler();
+    private VkHttpClient mVkHttpClient = VkHttpClient.getInstance();
 
     private LoginPresenter() {
+        getUser();
+        runCommand(new Command(15, () -> mView.showError("123")));
+        runCommand(new Command(15, () -> mView.showError("456")));
+        runCommand(new Command(15, () -> mView.showError("789")));
     }
 
-    @Override
-    protected void onFirstAttachView() {
-        showLoading(true);
-
-        Session session = Session.load(mView.getContext());
-        if (session != null) {
-            //TODO:asyncTask
-            new AsyncTask<Void, Void, Boolean>() {
-                @Override
-                protected void onPostExecute(Boolean aBoolean) {
-                    if (aBoolean) {
-                        Session.setCurrent(session);
-                        onLoggedIn();
-                    } else {
-                        showLogInPage();
-                    }
-                }
-
-                @Override
-                protected Boolean doInBackground(Void... voids) {
-                    return mVkClient.checkSession(session);
-                }
-            }.execute();
-        } else {
-            showLogInPage();
-        }
+    private void getUser() {
+        mVkHttpClient.getUser(this::onLoggedIn, errorMessage -> showLogInPage());
     }
 
     public boolean onRedirect(String url) {
         try {
-            Session session = mLogInHandler.getToken(url);
-            if (session != null) {
-                Session.setCurrent(session);
-                onLoggedIn();
+            if (mVkHttpClient.auth(url)) {
+                getUser();
                 return true;
             }
-        } catch (LogInHandler.AuthException e) {
+        } catch (VkHttpClient.AuthException e) {
             onLogInFailed(e.getMessage());
             return true;
         }
         return false;
     }
 
-    private void showLoading(boolean show) {
-        runCommand(new Command(false, () -> mView.showLoading(show)), false);
-    }
-
     private void showLogInPage() {
-        showLoading(false);
-        runCommand(new Command(false, () -> mView.showWeb()), true);
-        runCommand(new Command(true, () -> mView.openUrl(LogInHandler.AUTH_URI)), false);
+        runCommand(new UniqueCommand(SHOW_WEB_ID, () -> mView.showWeb()));
+        runCommand(new Command(OPEN_URL_ID, () -> mView.openUrl(VkHttpClient.AUTH_URL)));
     }
 
     private void onLoggedIn() {
-        showLoading(false);
-        runCommand(new Command(true, () -> {
-            Session.getCurrent().save(mView.getContext());
-            mView.onLoggedIn();
-        }), false);
+        clearCommands();
+        runCommand(new DisposableCommand(LOGGED_IN_ID, () -> mView.onLoggedIn()));
     }
 
     private void onLogInFailed(String error) {
-        showLoading(false);
-        runCommand(new Command(true, () -> {
-            mView.showError(error);
-            mView.openUrl(LogInHandler.AUTH_URI);
-        }), false);
+        runCommand(new DisposableCommand(ERROR_ID, () -> mView.showError(error)));
+        showLogInPage();
     }
 }
+

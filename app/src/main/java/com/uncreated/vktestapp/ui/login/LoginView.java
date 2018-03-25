@@ -14,7 +14,5 @@ public interface LoginView extends ViewBase {
 
     void showError(String error);
 
-    void showLoading(boolean show);
-
     void showWeb();
 }

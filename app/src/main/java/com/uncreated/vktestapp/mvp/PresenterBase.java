@@ -1,7 +1,6 @@
 package com.uncreated.vktestapp.mvp;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.LinkedList;
 
@@ -16,34 +15,17 @@ public abstract class PresenterBase<T extends ViewBase> {
     /**
      * Список обязательных команд
      */
-    protected LinkedList<Command> mRequiredCommands = new LinkedList<>();
-    /**
-     * Последняя команда
-     */
-    protected Command mLastCommand;
-
-    private boolean mFirstAttach = true;
+    protected LinkedList<Command> mCommands = new LinkedList<>();
 
     /**
-     * Привязывает view к презентеру и выполняет {@link this#onFirstAttachView()},
-     * если вызов первый, либо вызывает срабатывание всех накопленных команд
+     * Привязывает view к презентеру и вызывает срабатывание всех накопленных команд
      *
      * @param view наследуемый от {@link ViewBase}
      */
     public void onAttachView(@NonNull T view) {
         mView = view;
-        if (mFirstAttach) {
-            mFirstAttach = false;
-            onFirstAttachView();
-        } else {
-            runAllCommands();
-        }
+        runAllCommands();
     }
-
-    /**
-     * Вызывается при первой привязке view к презентеру
-     */
-    protected abstract void onFirstAttachView();
 
     /**
      * Отвязывает view от презентера
@@ -57,39 +39,73 @@ public abstract class PresenterBase<T extends ViewBase> {
     }
 
     /**
+     * Сбрасывает все сохранённые команды
+     */
+    protected void clearCommands() {
+        mCommands.clear();
+    }
+
+    /**
      * Сохраняет команду как последнюю и,
      * если она не null и к презентеру привязан {@link ViewBase}, выполняет её
      *
      * @param command выполняемая команда
      */
-    protected void runCommand(@Nullable Command command, boolean required) {
-        if (required) {
-            if (command != null) {
-                mRequiredCommands.add(command);
-            }
-            mLastCommand = null;
-        } else {
-            mLastCommand = command;
-        }
-        if (command != null) {
+    protected void runCommand(@NonNull Command command) {
+        command.add();
+        command.run();
+    }
+
+    protected void runAllCommands() {
+        for (Command command : mCommands) {
             command.run();
         }
     }
 
-
-    protected void runAllCommands() {
-        for (Command command : mRequiredCommands) {
-            command.run();
+    /**
+     * Срабатывает только 1 раз
+     */
+    public class DisposableCommand extends Command {
+        public DisposableCommand(int id, Runnable runnable) {
+            super(id, runnable);
         }
-        runCommand(mLastCommand, false);
+
+        @Override
+        boolean run() {
+            if (super.run()) {
+                mRunnable = null;
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Удаляет другие команды с таким же id
+     */
+    public class UniqueCommand extends Command {
+        public UniqueCommand(int id, Runnable runnable) {
+            super(id, runnable);
+        }
+
+        @Override
+        void add() {
+            int size = mCommands.size();
+            for (int i = size - 1; i >= 0; i--) {
+                if (mCommands.get(i).mId == mId) {
+                    mCommands.remove(i);
+                }
+            }
+            super.add();
+        }
     }
 
     public class Command {
-        private Runnable mRunnable;
-        private boolean mSingleCall;
+        protected int mId;
+        protected Runnable mRunnable;
 
-        public Command(boolean singleCall, Runnable runnable) {
-            mSingleCall = singleCall;
+        public Command(int id, @NonNull Runnable runnable) {
+            mId = id;
             mRunnable = runnable;
         }
 
@@ -97,13 +113,20 @@ public abstract class PresenterBase<T extends ViewBase> {
          * Выполняет операцию, если она определена и к презентеру прикреплен view
          * Если команда одиночного вызова, определение операции стирается
          */
-        void run() {
+        boolean run() {
             if (mRunnable != null && mView != null) {
                 mRunnable.run();
-                if (mSingleCall) {
-                    mRunnable = null;
-                }
+                return true;
             }
+            return false;
+        }
+
+        void add() {
+            mCommands.add(this);
+        }
+
+        public int getId() {
+            return mId;
         }
     }
 }

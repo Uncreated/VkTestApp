@@ -12,6 +12,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.uncreated.vktestapp.R;
 import com.uncreated.vktestapp.presentation.login.LoginPresenter;
@@ -25,15 +26,13 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
      * Для авторизации по протоколу OAuth 2.0
      */
     private WebView mWebView;
-
     private ImageView mLogoImageView;
+    private ProgressBar mProgressBar;
 
     /**
      * Заголовок окна ошибки
      */
     private String mErrorTitle;
-
-    private AlertDialog mAlertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +42,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
         mErrorTitle = getResources().getString(R.string.error_title);
 
         mLogoImageView = findViewById(R.id.image_view);
+        mProgressBar = findViewById(R.id.progress_bar);
 
         mWebView = findViewById(R.id.web_view);
         mWebView.setWebViewClient(new WebViewClient() {
@@ -59,6 +59,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
                         super.shouldOverrideUrlLoading(view, url);
             }
         });
+
 
         if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
@@ -88,38 +89,25 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
 
     @Override
     public void openUrl(String url) {
-        mWebView.loadUrl(url);
+        String currentUrl = mWebView.getUrl();
+        if (currentUrl == null || !currentUrl.equals(url)) {
+            mWebView.loadUrl(url);
+        }
     }
 
     @Override
     public void showError(String error) {
-        if (mAlertDialog != null) {
-            mAlertDialog.cancel();
-        }
-        mAlertDialog = new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setTitle(mErrorTitle)
                 .setMessage(error)
                 .show();
     }
 
     @Override
-    public void showLoading(boolean show) {
-        if (mAlertDialog != null) {
-            mAlertDialog.cancel();
-            mAlertDialog = null;
-        }
-        if (show) {
-            mAlertDialog = new AlertDialog.Builder(this)
-                    .setView(R.layout.dialog_loading)
-                    .setCancelable(false)
-                    .show();
-        }
-    }
-
-    @Override
     public void showWeb() {
         mWebView.setVisibility(View.VISIBLE);
         mLogoImageView.setVisibility(View.INVISIBLE);
+        mProgressBar.setVisibility(View.INVISIBLE);
     }
 
     @Override
