@@ -16,7 +16,7 @@ public class VkUser {
     private static final String USER_ID_KEY = "id";
     private static final String FIRST_NAME_KEY = "first_name";
     private static final String LAST_NAME_KEY = "last_name";
-    private static final String PHOTO_URL_KEY = "photo_max";
+    private static final String PHOTO_URL_KEY = "photo_max_orig";
 
     private Long mUserId;
     private String mFirstName;

@@ -1,14 +1,17 @@
 package com.uncreated.vktestapp.model.vk;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
+import android.widget.ImageView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -78,7 +81,7 @@ public class VkHttpClient {
     /**
      * Запрашивает у сервера информацию о текущем пользователе
      * при удачном получении необходимой информации о пользователе,
-     * вызывает {@link SuccessCallback#onSuccess()}, при любой ошибке
+     * вызывает {@link SuccessCallback#onSuccess(Object)}, при любой ошибке
      * вызывает {@link FailedCallback#onFailed(String)}
      */
     public void getUser(@NonNull SuccessCallback successCallback,
@@ -106,10 +109,11 @@ public class VkHttpClient {
 
         mRequestQueue.add(jsonRequest);
     }
+
     /**
      * Запрашивает у сервера информацию о друзьях текущего пользователя
      * при удачном получении необходимой информации о пользователе,
-     * вызывает {@link SuccessCallback#onSuccess()}, при любой ошибке
+     * вызывает {@link SuccessCallback#onSuccess(Object)}, при любой ошибке
      * вызывает {@link FailedCallback#onFailed(String)}
      */
     private void getFriends(@NonNull VkSession vkSession,
@@ -120,9 +124,10 @@ public class VkHttpClient {
         JSONObjectListener jsonObjectListener = new JSONObjectListener(failedCallback) {
             @Override
             void onSafeResponse(JSONObject response) throws JSONException {
-                JSONArray usersArray = response.getJSONArray("response");
+                response = response.getJSONObject("response");
+                JSONArray usersArray = response.getJSONArray("items");
                 Vk.getInstance().getVkUser().setFriendsByJsonArray(usersArray);
-                successCallback.onSuccess();
+                successCallback.onSuccess(null);
             }
         };
 
@@ -130,6 +135,14 @@ public class VkHttpClient {
                 null, jsonObjectListener, jsonObjectListener);
 
         mRequestQueue.add(jsonRequest);
+    }
+
+    public void getPhoto(@NonNull String photoUrl, @NonNull SuccessCallback<Bitmap> successCallback) {
+        ImageRequest imageRequest = new ImageRequest(photoUrl, successCallback::onSuccess,
+                1920, 1080, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
+                error -> getPhoto(photoUrl, successCallback));
+
+        mRequestQueue.add(imageRequest);
     }
 
     /**
@@ -177,8 +190,8 @@ public class VkHttpClient {
         return builder.build().toString();
     }
 
-    public interface SuccessCallback {
-        void onSuccess();
+    public interface SuccessCallback<T> {
+        void onSuccess(T response);
     }
 
     public interface FailedCallback {

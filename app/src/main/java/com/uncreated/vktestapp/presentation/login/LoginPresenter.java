@@ -24,13 +24,10 @@ public class LoginPresenter extends PresenterBase<LoginView> {
 
     private LoginPresenter() {
         getUser();
-        runCommand(new Command(15, () -> mView.showError("123")));
-        runCommand(new Command(15, () -> mView.showError("456")));
-        runCommand(new Command(15, () -> mView.showError("789")));
     }
 
     private void getUser() {
-        mVkHttpClient.getUser(this::onLoggedIn, errorMessage -> showLogInPage());
+        mVkHttpClient.getUser((response) -> this.onLoggedIn(), errorMessage -> showLogInPage());
     }
 
     public boolean onRedirect(String url) {

@@ -17,6 +17,8 @@ public abstract class PresenterBase<T extends ViewBase> {
      */
     protected LinkedList<Command> mCommands = new LinkedList<>();
 
+    private boolean mFirstAttach = true;
+
     /**
      * Привязывает view к презентеру и вызывает срабатывание всех накопленных команд
      *
@@ -24,7 +26,17 @@ public abstract class PresenterBase<T extends ViewBase> {
      */
     public void onAttachView(@NonNull T view) {
         mView = view;
+        if (mFirstAttach) {
+            mFirstAttach = false;
+            onFirstAttachView();
+        }
         runAllCommands();
+    }
+
+    /**
+     * Срабатывает при первом вызове {@link this#onAttachView(ViewBase)}
+     */
+    public void onFirstAttachView() {
     }
 
     /**

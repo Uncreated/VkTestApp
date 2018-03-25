@@ -30,7 +30,6 @@ public class Vk {
         VkHttpClient.init(context);
     }
 
-    @Nullable
     VkSession getVkSession() {
         return mVkSession;
     }
@@ -40,8 +39,7 @@ public class Vk {
         mVkSession.save(mContext);
     }
 
-    @Nullable
-    VkUser getVkUser() {
+    public VkUser getVkUser() {
         return mVkUser;
     }
 
