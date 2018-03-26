@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,16 +19,10 @@ import java.util.List;
 
 public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHolder> {
 
-    public interface OnFriendClickListener {
-        void onFriendClick(int friendIndex);
-
-        void onFriendPhotoClick(ImageView imageView, int friendIndex);
-    }
-
     private List<VkUser> mFriends;
     private RecyclerView mRecyclerView;
     private LayoutInflater mLayoutInflater;
-    private OnFriendClickListener mOnFriendClickListener;
+    private FriendsFragment.OnFriendClickListener mOnFriendClickListener;
     private FriendsFragment mFriendsFragment;
     private FriendsPresenter mFriendsPresenter = FriendsPresenter.getInstance();
 
@@ -39,7 +32,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
 
     public FriendsAdapter(@NonNull List<VkUser> friends, @NonNull RecyclerView recyclerView,
                           @NonNull Context context, @NonNull FriendsFragment friendsFragment,
-                          @NonNull OnFriendClickListener onFriendClickListener) {
+                          @NonNull FriendsFragment.OnFriendClickListener onFriendClickListener) {
         mFriends = friends;
         mRecyclerView = recyclerView;
         mLayoutInflater = LayoutInflater.from(context);
@@ -75,7 +68,11 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
                 holder.mAvatarImageView.setImageBitmap(image);
             }
         }
+        holder.mCardView.setOnClickListener(v -> mOnFriendClickListener.onFriendClick(vkUser.getUserId()));
+        holder.mAvatarImageView.setOnClickListener(
+                v -> mOnFriendClickListener.onFriendPhotoClick(holder.mAvatarImageView, vkUser.getUserId()));
     }
+
     @Override
     public long getItemId(int position) {
         return position;

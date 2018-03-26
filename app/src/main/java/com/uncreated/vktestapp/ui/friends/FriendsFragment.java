@@ -17,7 +17,16 @@ import com.uncreated.vktestapp.presentation.friends.FriendsPresenter;
 
 import java.util.List;
 
+/**
+ * Фрагмент для отображения списка друзей
+ */
 public class FriendsFragment extends Fragment implements FriendsView {
+
+    public interface OnFriendClickListener {
+        void onFriendClick(long userId);
+
+        void onFriendPhotoClick(ImageView imageView, long userId);
+    }
 
     private FriendsPresenter mFriendsPresenter = FriendsPresenter.getInstance();
 
@@ -47,23 +56,10 @@ public class FriendsFragment extends Fragment implements FriendsView {
 
     @Override
     public void setFriends(List<VkUser> friends) {
-        mFriendsAdapter = new FriendsAdapter(friends, mRecyclerView, getActivity(),
-                this, new FriendsAdapter.OnFriendClickListener() {
-            @Override
-            public void onFriendClick(int friendIndex) {
-
-            }
-
-            @Override
-            public void onFriendPhotoClick(ImageView imageView, int friendIndex) {
-
-            }
-        });
-        mRecyclerView.setAdapter(mFriendsAdapter);
-    }
-
-    @Override
-    public void onPhotoChanged() {
-
+        if (getActivity() != null) {
+            mFriendsAdapter = new FriendsAdapter(friends, mRecyclerView, getActivity(),
+                    this, (OnFriendClickListener) getActivity());
+            mRecyclerView.setAdapter(mFriendsAdapter);
+        }
     }
 }

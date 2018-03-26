@@ -24,6 +24,7 @@
                 android:layout_width="@dimen/thumb_size"
                 android:layout_height="@dimen/thumb_size"
                 android:background="@color/thumbBackground"
+                android:src="@drawable/avatar400x400"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

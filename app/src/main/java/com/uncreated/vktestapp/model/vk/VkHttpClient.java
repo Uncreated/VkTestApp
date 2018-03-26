@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.volley.Request;
@@ -160,7 +159,8 @@ public class VkHttpClient {
             @Override
             void onSafeResponse(JSONObject response) throws JSONException {
                 JSONArray imageArray = response.getJSONArray("response");
-                vkUser.setFriendsImagesByJson(imageArray);
+                vkUser.setFriendsImagesFromJson(imageArray);
+
                 successCallback.onSuccess(null);
             }
         };
@@ -189,6 +189,34 @@ public class VkHttpClient {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void getAllImages(@NonNull VkUser vkUser,
+                             @NonNull SuccessCallback<Void> successCallback,
+                             @NonNull FailedCallback failedCallback) {
+        VkSession vkSession = Vk.getInstance().getVkSession();
+        if (vkSession == null) {
+            failedCallback.onFailed("Incorrect session");
+            return;
+        }
+
+        String url = makeGetAllImagesUrl(vkSession, vkUser);
+
+        JSONObjectListener jsonObjectListener = new JSONObjectListener(failedCallback) {
+            @Override
+            void onSafeResponse(JSONObject response) throws JSONException {
+                response = response.getJSONObject("response");
+                JSONArray usersArray = response.getJSONArray("items");
+
+                vkUser.setAllImagesFromJson(usersArray);
+                successCallback.onSuccess(null);
+            }
+        };
+
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, url,
+                null, jsonObjectListener, jsonObjectListener);
+
+        mRequestQueue.add(jsonRequest);
     }
 
     /**
@@ -225,6 +253,14 @@ public class VkHttpClient {
         }
         String url = makeUrl(vkSession, "photos.getById", new Pair<>("extended", "1"));
         return url + "&photos=" + images;
+    }
+
+    private static String makeGetAllImagesUrl(@NonNull VkSession vkSession,
+                                              @NonNull VkUser vkUser) {
+        return makeUrl(vkSession, "photos.getAll",
+                new Pair<>("owner_id", vkUser.getUserId().toString()),
+                new Pair<>("extended", "1"),
+                new Pair<>("no_service_albums", "1"));
     }
 
     /**

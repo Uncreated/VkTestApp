@@ -10,6 +10,8 @@ public class VkImage {
 
     private String mImageId;
     private String mImageUrl;
+    private long mLikes;
+    private long mReposts;
 
     public VkImage(String imageId) {
         mImageId = imageId;
@@ -26,6 +28,18 @@ public class VkImage {
             if (imageJson.has(photoSize)) {
                 VkImage vkImage = new VkImage(imageId);
                 vkImage.setImageUrl(imageJson.getString(photoSize));
+                if (!imageJson.isNull("likes")) {
+                    JSONObject likes = imageJson.getJSONObject("likes");
+                    if (!likes.isNull("count")) {
+                        vkImage.setLikes(likes.getInt("count"));
+                    }
+                }
+                if (!imageJson.isNull("reposts")) {
+                    JSONObject reposts = imageJson.getJSONObject("reposts");
+                    if (!reposts.isNull("count")) {
+                        vkImage.setReposts(reposts.getInt("count"));
+                    }
+                }
                 return vkImage;
             }
         }
@@ -47,6 +61,22 @@ public class VkImage {
 
     public String getUserId() {
         return mImageId.substring(0, mImageId.indexOf('_'));
+    }
+
+    public long getLikes() {
+        return mLikes;
+    }
+
+    public void setLikes(long likes) {
+        mLikes = likes;
+    }
+
+    public long getReposts() {
+        return mReposts;
+    }
+
+    public void setReposts(long reposts) {
+        mReposts = reposts;
     }
 
     @Override

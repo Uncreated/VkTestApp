@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class VkUser {
     private String mLastName;
     private VkImage mImage;
     private HashMap<String, VkUser> mFriends;
-    private List<VkImage> mAllImages;
+    private List<VkImage> mAllImages = new LinkedList<>();
 
     private VkUser(@NonNull Long userId, @NonNull String firstName, @NonNull String lastName) {
         mUserId = userId;
@@ -62,11 +63,18 @@ public class VkUser {
         }
     }
 
-    void setFriendsImagesByJson(@NonNull JSONArray imageArray) throws JSONException {
+    void setFriendsImagesFromJson(@NonNull JSONArray imageArray) throws JSONException {
         for (int i = 0; i < imageArray.length(); i++) {
             VkImage vkImage = VkImage.getFromJson(imageArray.getJSONObject(i));
             VkUser vkUser = mFriends.get(vkImage.getUserId());
             vkUser.setImage(vkImage);
+        }
+    }
+
+    void setAllImagesFromJson(@NonNull JSONArray imageArray) throws JSONException {
+        for (int i = 0; i < imageArray.length(); i++) {
+            VkImage vkImage = VkImage.getFromJson(imageArray.getJSONObject(i));
+            mAllImages.add(vkImage);
         }
     }
 
@@ -89,6 +97,11 @@ public class VkUser {
 
     public void setImage(VkImage image) {
         mImage = image;
+        if (mAllImages.size() == 0) {
+            mAllImages.add(image);
+        } else {
+            mAllImages.set(0, image);
+        }
     }
 
     public HashMap<String, VkUser> getFriends() {

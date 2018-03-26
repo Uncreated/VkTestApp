@@ -4,4 +4,6 @@
     <string name="password">Пароль</string>
     <string name="login">Логин</string>
     <string name="error_title">Ошибка</string>
+
+    <string name="images_update_error">Ошибка загрузки изображений</string>
 </resources>

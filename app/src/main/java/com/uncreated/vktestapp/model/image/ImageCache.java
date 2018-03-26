@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
 /**
  * Класс хранит масштабированные изображения в памяти,
  * оригинальные изображения на диске,
