@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,8 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
     private FriendsFragment mFriendsFragment;
     private FriendsPresenter mFriendsPresenter = FriendsPresenter.getInstance();
 
+    private final int mThumbSize;
+
     private int mSelected = -1;
 
     public FriendsAdapter(@NonNull List<VkUser> friends, @NonNull RecyclerView recyclerView,
@@ -42,6 +45,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         mLayoutInflater = LayoutInflater.from(context);
         mFriendsFragment = friendsFragment;
         mOnFriendClickListener = onFriendClickListener;
+        mThumbSize = (int) context.getResources().getDimension(R.dimen.thumb_size);
     }
 
     @NonNull
@@ -60,14 +64,26 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         }
         holder.mFirstNameTextView.setText(vkUser.getFirstName());
         holder.mLastNameTextView.setText(vkUser.getLastName());
-        mFriendsPresenter.loadPhoto(vkUser.getPhotoUrl(), holder.mAvatarImageView.getWidth(),
-                holder.mAvatarImageView.getHeight(),
-                new FriendsView.OnPhotoLoadedListener(mFriendsFragment) {
-                    @Override
-                    public void onPhotoLoaded(Bitmap bitmap) {
-                        holder.mAvatarImageView.setImageBitmap(bitmap);
-                    }
-                });
+        if (vkUser.getImage() != null) {
+            Bitmap image = mFriendsPresenter.loadImage(vkUser.getImage(), mThumbSize, mThumbSize,
+                    bitmap -> {
+                        if (!mRecyclerView.isComputingLayout()) {
+                            notifyItemChanged(position);
+                        }
+                    });
+            if (image != null) {
+                holder.mAvatarImageView.setImageBitmap(image);
+            }
+        }
+    }
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     @Override
@@ -89,4 +105,6 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
             mLastNameTextView = itemView.findViewById(R.id.tv_last_name);
         }
     }
+
+
 }

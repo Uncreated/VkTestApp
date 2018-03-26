@@ -21,9 +21,9 @@
 
             <ImageView
                 android:id="@+id/iv_photo"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/ic_launcher_background"
+                android:layout_width="@dimen/thumb_size"
+                android:layout_height="@dimen/thumb_size"
+                android:background="@color/thumbBackground"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

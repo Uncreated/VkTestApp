@@ -1,6 +1,7 @@
 package com.uncreated.vktestapp.mvp;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.LinkedList;
 
@@ -127,6 +128,7 @@ public abstract class PresenterBase<T extends ViewBase> {
          */
         boolean run() {
             if (mRunnable != null && mView != null) {
+                Log.d("Presenter", mId + ": " + getClass().getSimpleName());
                 mRunnable.run();
                 return true;
             }

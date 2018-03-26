@@ -1,11 +1,16 @@
 package com.uncreated.vktestapp.presentation.friends;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
-import com.uncreated.vktestapp.model.PhotoCache;
+import com.uncreated.vktestapp.model.image.ImageCache;
+import com.uncreated.vktestapp.model.image.ImageLoadedCallback;
 import com.uncreated.vktestapp.model.vk.Vk;
+import com.uncreated.vktestapp.model.vk.VkImage;
 import com.uncreated.vktestapp.mvp.PresenterBase;
 import com.uncreated.vktestapp.ui.friends.FriendsView;
+
+import java.util.ArrayList;
 
 public class FriendsPresenter extends PresenterBase<FriendsView> {
     private static final int SET_FRIENDS = 1;
@@ -16,11 +21,11 @@ public class FriendsPresenter extends PresenterBase<FriendsView> {
         return ourInstance;
     }
 
-    private PhotoCache mPhotoCache = PhotoCache.getInstance();
+    private ImageCache mImageCache = ImageCache.getInstance();
 
     private FriendsPresenter() {
-        runCommand(new UniqueCommand(SET_FRIENDS,
-                () -> mView.setFriends(Vk.getInstance().getVkUser().getFriends())));
+        runCommand(new UniqueCommand(SET_FRIENDS, () -> mView.setFriends(
+                new ArrayList<>(Vk.getInstance().getVkUser().getFriends().values()))));
     }
 
     @Override
@@ -28,17 +33,15 @@ public class FriendsPresenter extends PresenterBase<FriendsView> {
     }
 
     /**
-     * Запрашивает фото по photoUrl в размере (width, height)
-     * Если view был откреплён, вызов onPhotoLoadedListener не происходит
+     * Запрашивает фото по vkImage в размере (width, height)
+     * Если view был откреплён, вызов imageLoadedCallback не происходит
      */
-    public void loadPhoto(String photoUrl, int width, int height,
-                          FriendsView.OnPhotoLoadedListener onPhotoLoadedListener) {
-        mPhotoCache.loadPhoto(photoUrl, width, height, new FriendsView.OnPhotoLoadedListener(mView) {
-            @Override
-            public void onPhotoLoaded(Bitmap bitmap) {
-                if (getFriendsView() == mView) {
-                    onPhotoLoadedListener.onPhotoLoaded(bitmap);
-                }
+    public Bitmap loadImage(@NonNull VkImage vkImage, int width, int height,
+                            @NonNull ImageLoadedCallback imageLoadedCallback) {
+        final FriendsView currentView = mView;
+        return mImageCache.loadImage(vkImage, width, height, bitmap -> {
+            if (mView != null && currentView == mView) {
+                imageLoadedCallback.onImageLoaded(bitmap);
             }
         });
     }

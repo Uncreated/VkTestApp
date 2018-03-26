@@ -2,6 +2,7 @@ package com.uncreated.vktestapp;
 
 import android.app.Application;
 
+import com.uncreated.vktestapp.model.image.ImageCache;
 import com.uncreated.vktestapp.model.vk.Vk;
 
 public class App extends Application {
@@ -10,5 +11,6 @@ public class App extends Application {
         super.onCreate();
 
         Vk.init(this);
+        ImageCache.init(this);
     }
 }
