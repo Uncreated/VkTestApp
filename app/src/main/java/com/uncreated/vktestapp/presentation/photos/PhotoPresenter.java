@@ -2,6 +2,7 @@ package com.uncreated.vktestapp.presentation.photos;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.uncreated.vktestapp.model.image.ImageCache;
 import com.uncreated.vktestapp.model.image.ImageLoadedCallback;
@@ -36,12 +37,16 @@ public class PhotoPresenter extends PresenterBase<PhotoView> {
     }
 
     public Bitmap loadImage(@NonNull VkImage vkImage, int width, int height,
-                            @NonNull ImageLoadedCallback imageLoadedCallback) {
+                            @Nullable ImageLoadedCallback imageLoadedCallback) {
         final PhotoView currentView = mView;
-        return mImageCache.loadImage(vkImage, width, height, bitmap -> {
-            if (mView != null && currentView == mView) {
-                imageLoadedCallback.onImageLoaded(bitmap);
-            }
-        });
+        ImageLoadedCallback safeCallback = null;
+        if (imageLoadedCallback != null) {
+            safeCallback = bitmap -> {
+                if (mView != null && currentView == mView) {
+                    imageLoadedCallback.onImageLoaded(bitmap);
+                }
+            };
+        }
+        return mImageCache.loadImage(vkImage, width, height, safeCallback);
     }
 }

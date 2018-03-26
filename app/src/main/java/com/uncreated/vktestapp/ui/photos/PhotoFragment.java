@@ -3,7 +3,6 @@ package com.uncreated.vktestapp.ui.photos;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -36,6 +35,7 @@ public class PhotoFragment extends Fragment implements PhotoView {
     private List<VkImage> mPhotoList;
     private int mDisplayWidth = 1;
     private int mDisplayHeight = 1;
+    private int mThumbSize;
 
     private String mErrorTitle;
     private String mErrorMessage;
@@ -49,6 +49,8 @@ public class PhotoFragment extends Fragment implements PhotoView {
 
         mErrorTitle = getResources().getString(R.string.error_title);
         mErrorMessage = getResources().getString(R.string.images_update_error);
+        mThumbSize = (int) getResources().getDimension(R.dimen.thumb_size);
+
         mPhotoPresenter.onAttachView(this);
     }
 
@@ -66,7 +68,6 @@ public class PhotoFragment extends Fragment implements PhotoView {
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
 
         mViewPager = view.findViewById(R.id.pager);
-        mViewPager.setPageTransformer(true, new ZoomPageTransformer());
 
         Activity activity = getActivity();
         if (activity != null) {
@@ -75,10 +76,11 @@ public class PhotoFragment extends Fragment implements PhotoView {
             mDisplayWidth = size.x;
             mDisplayHeight = size.y;
 
-            Intent intent = activity.getIntent();
-            String userId = intent.getStringExtra(USER_ID_KEY);
-            int imageIndex = intent.getIntExtra(IMAGE_INDEX_KEY, 0);
+            String userId = activity.getIntent().getStringExtra(USER_ID_KEY);
+            int imageIndex = activity.getIntent().getIntExtra(IMAGE_INDEX_KEY, 0);
+
             mPhotoList = mPhotoPresenter.getAllImages(userId);
+
             mViewPager.setAdapter(new CustomPagerAdapter());
             mViewPager.setCurrentItem(imageIndex);
         }
@@ -104,6 +106,19 @@ public class PhotoFragment extends Fragment implements PhotoView {
         }
     }
 
+    private void setImage(ImageView imageView, VkImage vkImage) {
+        Bitmap image = mPhotoPresenter.loadImage(vkImage, mThumbSize, mThumbSize,
+                null);
+        if (image != null) {
+            imageView.setImageBitmap(image);
+        }
+        image = mPhotoPresenter.loadImage(vkImage, mDisplayWidth,
+                mDisplayHeight, imageView::setImageBitmap);
+        if (image != null) {
+            imageView.setImageBitmap(image);
+        }
+    }
+
     class CustomPagerAdapter extends PagerAdapter {
 
         @Override
@@ -117,12 +132,8 @@ public class PhotoFragment extends Fragment implements PhotoView {
             View itemView = mLayoutInflater.inflate(R.layout.page_item, container, false);
 
             ImageView imageView = itemView.findViewById(R.id.image_view);
-            Bitmap image = mPhotoPresenter.loadImage(mPhotoList.get(position), mDisplayWidth,
-                    mDisplayHeight, imageView::setImageBitmap);
-
-            if (image != null) {
-                imageView.setImageBitmap(image);
-            }
+            imageView.setTag("p" + position);
+            setImage(imageView, mPhotoList.get(position));
 
             container.addView(itemView);
 
@@ -157,11 +168,11 @@ public class PhotoFragment extends Fragment implements PhotoView {
                 float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
                 float vertMargin = pageHeight * (1 - scaleFactor) / 2;
                 float horzMargin = pageWidth * (1 - scaleFactor) / 2;
-                if (position < 0) {
+                /*if (position < 0) {
                     view.setTranslationX(horzMargin - vertMargin / 2);
                 } else {
                     view.setTranslationX(-horzMargin + vertMargin / 2);
-                }
+                }*/
 
                 // Scale the page down (between MIN_SCALE and 1)
                 view.setScaleX(scaleFactor);

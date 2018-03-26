@@ -21,7 +21,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.friends.FriendsActivity" />
-        <activity android:name=".ui.photos.PhotoActivity"></activity>
+        <activity
+            android:name=".ui.photos.PhotoActivity"
+            android:theme="@style/AppTheme.Fullscreen" />
     </application>
 
 </manifest>

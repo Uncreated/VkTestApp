@@ -38,7 +38,6 @@ public class ImageCache {
     /**
      * Масштабированные изображения
      */
-    //TODO: заменить размер
     private LruCache<String, Bitmap> mMemoryCache = new LruCache<String, Bitmap>(MEMORY_SIZE) {
         @Override
         protected int sizeOf(String key, Bitmap value) {
@@ -59,11 +58,11 @@ public class ImageCache {
      */
     @Nullable
     public Bitmap loadImage(@NonNull VkImage vkImage, int maxWidth, int maxHeight,
-                            @NonNull ImageLoadedCallback imageLoadedCallback) {
+                            @Nullable ImageLoadedCallback imageLoadedCallback) {
         Log.d("PhotoCache", vkImage.getImageId());
         String memoryKey = makeMemoryKey(vkImage, maxWidth, maxHeight);
         Bitmap bitmap = mMemoryCache.get(memoryKey);
-        if (bitmap == null) {
+        if (bitmap == null && imageLoadedCallback != null) {
             new ImageLoader(mMemoryCache, vkImage, maxWidth, maxHeight, imageLoadedCallback).execute();
         }
         return bitmap;

@@ -39,6 +39,8 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         mFriendsFragment = friendsFragment;
         mOnFriendClickListener = onFriendClickListener;
         mThumbSize = (int) context.getResources().getDimension(R.dimen.thumb_size);
+
+        mRecyclerView.setItemAnimator(null);
     }
 
     @NonNull
@@ -68,9 +70,8 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
                 holder.mAvatarImageView.setImageBitmap(image);
             }
         }
-        holder.mCardView.setOnClickListener(v -> mOnFriendClickListener.onFriendClick(vkUser.getUserId()));
-        holder.mAvatarImageView.setOnClickListener(
-                v -> mOnFriendClickListener.onFriendPhotoClick(holder.mAvatarImageView, vkUser.getUserId()));
+        holder.mCardView.setOnClickListener(v -> mOnFriendClickListener.onFriendPhotoClick(
+                holder.mAvatarImageView, vkUser.getUserId()));
     }
 
     @Override

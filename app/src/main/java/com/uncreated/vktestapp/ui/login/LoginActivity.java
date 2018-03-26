@@ -20,6 +20,14 @@ import com.uncreated.vktestapp.ui.friends.FriendsActivity;
 
 public class LoginActivity extends AppCompatActivity implements LoginView {
 
+    /**
+     * Основное время ушло на реализацию функционала без использования сторонних библиотек
+     * По факту, тестовое задание получилось не полным:
+     * - Анимации разворачивания изображения нет
+     * - Отображения информации под фото нет, хоть и хранится в VkImage
+     * - Тестов нет
+     */
+
     private final LoginPresenter mLoginPresenter = LoginPresenter.getInstance();
 
     /**

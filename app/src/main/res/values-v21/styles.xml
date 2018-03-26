@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme.AppTheme" parent="AppTheme">
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowSharedElementEnterTransition">@transition/image_transition</item>
+        <item name="android:windowSharedElementExitTransition">@transition/image_transition</item>
+    </style>
+</resources>

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.uncreated.vktestapp.R;
+import com.uncreated.vktestapp.model.vk.VkImage;
 import com.uncreated.vktestapp.model.vk.VkUser;
 import com.uncreated.vktestapp.presentation.friends.FriendsPresenter;
 
@@ -23,8 +24,6 @@ import java.util.List;
 public class FriendsFragment extends Fragment implements FriendsView {
 
     public interface OnFriendClickListener {
-        void onFriendClick(long userId);
-
         void onFriendPhotoClick(ImageView imageView, long userId);
     }
 
